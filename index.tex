@@ -1,0 +1,945 @@
+\documentclass[14pt]{extarticle}
+% \documentclass[14pt]{article}
+% \usepackage[utf8]{inputenc}
+% \usepackage[T1,T2A]{fontenc}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+% \usepackage{mathptmx}
+% \usepackage{txfonts}
+% \usepackage{setspace}
+% \onehalfspacing{}
+\usepackage{titlesec}
+
+% \usepackage{csquotes}
+% \usepackage{capt-of}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage[left=25mm,right=10mm,top=20mm,bottom=20mm]{geometry}
+\usepackage{amsfonts}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{er,positioning}
+\usepackage{pgfplots}
+\usetikzlibrary{graphs,quotes}
+
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+% \fancyhf{} % clear all header and footer fields
+\fancyhead[RO,RE]{\thepage} %RO=right odd, RE=right even
+\fancyhead[L]{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+
+\usepackage[ukrainian]{babel}
+
+\usepackage{polyglossia}
+\setdefaultlanguage{ukrainian}
+\setotherlanguages{english}
+\newfontfamily{\cyrillicfonttt}{FiraCode Nerd Font}
+
+\usepackage[format=plain,
+	labelfont={bf},
+	textfont=it]{caption}
+
+\author{Кирило Байбула}
+\date{\today}
+
+\def\title#1{\gdef\@title{#1}\gdef\THETITLE{#1}}
+
+\title{Знаходження оптимального шляху обміну у біржах на основі маркет-мейкерів функціями обміну константного добутку}
+
+\usepackage{biblatex}
+\addbibresource{bibliography.bib}
+
+\usepackage{totcount}
+\newtotcounter{citenum}
+\AtEveryBibitem{\stepcounter{citenum}}
+
+\usepackage{zref-totpages}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{lemma}{Лема}
+\renewcommand\qedsymbol{$\blacksquare$}
+
+
+\begin{document}
+
+\begin{titlepage}
+	\begin{center}
+		\vspace*{1cm}
+
+		\textbf{КИЇВСЬКИЙ НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ ІМЕНІ \\ ТАРАСА ШЕВЧЕНКA} \\
+		Факультет комп'ютерних наук та кібернетики \\
+		Кафедра Дослiдження операцiй
+
+		\vspace{2.0cm}
+		ВИПУСКНА КВАЛІФІКАЦІЙНА РОБОТА БАКАЛАВРА \\
+		на тему: \\
+		\textbf{\THETITLE}
+		\vspace{1.5cm}
+		\begin{flushright}
+			студента 4-го курсу \\
+			Байбули Кирила Аленовича \\
+			\vspace{2.0cm}
+			Науковий керівник: \\
+			доктор фізико-математичних наук, доцент, \\
+			професор кафедри дослідження операцій \\
+			Самойленко Ігор Валерійович
+		\end{flushright}
+
+		\vfill
+
+		\vspace{0.8cm}
+		Київ ---  2024
+	\end{center}
+\end{titlepage}
+\newpage
+
+
+\section*{РЕФЕРАТ}\label{sec:abstract}
+
+Обсяг роботи~\ztotpages{} сторінки та \total{citenum} використаних джерел.
+
+БІРЖІ, МАРКЕТ-МЕЙКЕРИ, АММ, КОНСТАНТНІ ФУНКЦІЇ ОБМІНУ, ДИНАМІЧНІ ГРАФИ,
+ОПТИМІЗАЦІЯ, АЛГОРИТМИ, ПРОТОКОЛИ.
+
+Дана робота присвячена дослідженню методів обробки бірж основаних на методі
+автоматизованих маркет-мейкерів (з англ. ``Automated Market Maker'') AMM і їх
+часткового випадку із константними функціями обміну. Головною метою роботи є
+розробка та імплементація алгоритму знаходження найоптимальнішого шляху для
+динамічного графа подібної біржі. Оптимальним буде вважатися шлях що між всіма
+можливими шляхами пари валют $X/Y$ буде отримувати найбільшу кількість $Y$ за
+$X$.
+
+\newpage
+
+\renewcommand{\contentsname}{ЗМІСТ}
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+
+\section*{СКОРОЧЕННЯ ТА УМОВНІ ПОЗНАЧЕННЯ}\label{sec:notation}
+
+\begin{center}
+	\begin{tabular}{ll}
+		Позначення       & Значення                                               \\[0pt]
+		\hline{}
+		ААМ              & Біржі основані на методі автоматичних маркет-майкерів. \\[0pt]
+		ММКФ             & Маркет мейкери із константними функціями               \\[0pt]
+		\(X/Y\)          & Пара на біржі валюти типу \(X\) та \(Y\)               \\[0pt]
+		\(X \implies Y\) & Короткий запис обміну валюти \(X\) на \(Y\)            \\[0pt]
+	\end{tabular}
+\end{center}
+
+\newpage
+
+\section{ВСТУП}\label{sec:intro}
+
+У світі фінансів і торгівлі цінними паперами, централізовані біржі завжди
+відігравали ключову роль, забезпечуючи місцезнаходження та централізовану
+інфраструктуру для трейдерів та інвесторів. Проте останнім часом відбувається
+зростання інтересу до децентралізованих бірж, що призводить до переворотних змін
+у фінансовому секторі. Децентралізовані біржі стають ключовим елементом цієї
+нової економічної парадигми. Підкріпленні математикою та детермінованими
+правилами, децентралізовані біржі забезпечують високу швидкість та надійність
+для їх користвачів та завдяки відкритості дають нові можливості для нових
+незалежних гравців ринку.
+
+У данній роботі ми розглянемо біржі основані на методі автоматизованих
+маркет-мейкерів (з англ. ``Automated Market Maker'') найдавніша згадка котрих
+датується ще 1956~\cite{mccarthy}. Конкретно розглянемо простий для аналізу і
+один з найпопулярніших по кількості імплементацій варіант на константних
+функціях~\cite{angeris_2023}.
+
+На відміну від традиційних бірж, де ціна
+визначається за допомогою зіставлення заявок купівлі та продажу, ААМ
+використовують алгоритм для визначення відношення вартості валют через кількості
+вкладів у валютну пару. Це дозволяє створити вигідну систему для владників
+ліквідності, що отримують винагороду за свої вклади, а також для бажаючих
+скористатися ліквідністю для обміну.
+
+Також основною цілю нашого дослідженню буде біржа Uniswap V2~\cite{adams2021uniswap},
+котра є однією з найпопуляніших імплементацій АММ на даний момент.
+
+\subsection{Загальна математична модель}\label{sec:math-model}
+
+\subsubsection{Константна функція обміну}
+
+ММКФ відносно просто описати аналітично, тому багато дослідників і практиків
+працюють з ними саме в такому ``аналітичному'' середовищі. Модель складається з
+двох основних об'єктів: торгової функції $f : \mathbf{R}_{+}^{n} \mapsto \mathbf{R}$
+та вектора запасів $R \in \mathbf{R}^{n}_{+}$. Користувач пропонує обмін, представлену у
+вигляді портфеля $\Delta \in \mathbf{R}_{n}$, і обмін вважається дійсним, якщо торгова функція,
+оцінена на резервах після завершення обміну, має те саме значення, що і функція,
+оцінена на резервах до завершення угоди, тобто, якщо $f(R - \Delta) = f(R)$. (Звідси
+і назва ``маркет-мейкер з постійною функцією''.) Якщо ця рівність виконується,
+то ММКФ виплачує користувачеві $\Delta$, що призводить до появи нових резервів
+$R - \Delta$. (Якщо угода є недійсною, користувач нічого не отримує і не виплачує.)
+Постачальники ліквідності, які надають резерви $R$, під які здійснюються угоди,
+заробляють на цих угодах комісійні. Той факт, що цей процес легко описати і
+реалізувати, а також те, що він має багато сильних теоретичних гарантій, став
+однією з причин його успіху, особливо в таких складних для захисту середовищах,
+як публічні блокчейни. Незважаючи на простий опис, ММКФ породили велику
+кількість досліджень їх фінансових, арбітражних і маршрутних властивостей
+(наприклад,~\cite{Angeris_2020},~\cite{danos}, серед багатьох інших).
+
+У нашому випадку розглядається імлементація ММКФ від Uniswap:
+
+\begin{equation}\label{eq:intro-swap}
+	R_{x} \cdot R_{y} = k = const
+\end{equation}
+
+де \(R_{x}\) кількість валюти (резерви від англ. ``reserves'') \(X\), та
+\(R_{y}\) кількість валюти \(Y\) у парі \(X/Y\), а \(k\) --- деяка константа котра
+задається при створенні пари на біржі. Що є маркет мейкером константного
+добутку~\cite{zhang2018formal} (з англ. \textit{``CPMM Constant Product Market
+  Maker''}), де відношення вкладів до і після має бути константним. Тобто при
+продажі $\Delta x$ валюти отримуємо $\Delta y$:
+
+\begin{equation*}
+	R_{x} \cdot R_{y} = (R_{x} + \Delta x) \cdot (R_{y} - \Delta y)
+\end{equation*}
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[domain=0:4]
+		\begin{axis}%
+			[
+				grid=major,
+				ticks=none,
+				xlabel={\tiny $x$},
+				ylabel={\tiny $y$},
+				axis x line=left,
+				axis y line=left,
+				no markers,
+				domain=0:10,
+				restrict y to domain=0:10000
+			]
+			\addplot[thick,samples=400] (x,{10000/x});
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Зображення графіку залежностей вкладів у пару}\label{fig:isoquant}
+\end{figure}
+
+\subsubsection{Біржевий граф}
+
+Нехай \(G_{t} = (V_{t}, E_{t})\) --- неорієнтований динамічний граф, де \(V_{t}\) ---
+множина вершин таких, що кожна вершина є конкретною валютою на біржі,
+\(E_{t}\) --- множина ребер цього графа, тобто кожне ребро відображує те, чи є
+можливість на біржі обміняти деякі дві різні валюти з \(V_{t}\), у момент часу
+\(t\).
+
+Так як в залежності від часу на біржі можуть з'являтися та зникати як валюти
+так і зв'язки (шляхи обміну) між ними, то ми описуємо біржу у вигляді
+динамічного графа, що залежить від часу \(t\)~\cite{siljak}. Вага ребра
+визначається я функція від вкладів у пару на момент часу \(t\) та об'єму обміну
+при проходженні через дане ребро (про що мова йде далі).
+
+У біржі існує два типи подій, що змінюють стан біржі:
+
+\begin{enumerate}
+  \item Створення нової пари (змінює ребра та вершини).
+  \item Обмін однієї пари або послідовності валют на біржі (змінює ваги ребер).
+\end{enumerate}
+
+\newpage
+
+\section{Функція обміну}
+
+У даному розділі ми розширeмо та формалізуємо модель описану у вступі
+(\ref{sec:math-model}).
+
+\subsection{Об'єм при одному обміні в парі}
+
+\begin{lemma} Нехай існує на біржі пара \(X/Y\) із об'ємом \(R_{X}\) вкладів
+	валюти \(X\) та \(R_{Y}\) вкладів валюти \(Y\). Тоді об'єм \(y\) валюти \(Y\)
+	при вкладанні \(x\) валюти \(X\) у пару \(X/Y\) дорівнює:
+
+	\begin{equation}\label{eq:swap}
+		y = \frac{R_{Y}x}{(R_{X} + x)}
+	\end{equation}
+\end{lemma}
+
+\begin{proof}
+	Розглянувши~\eqref{eq:intro-swap} неважко вивести формулу отримуємої кількості
+	\(y\) валюти \(Y\) при вкладанні \(x\) кількості валюти \(X\) у пару \(X/Y\)
+	із вкладами \(R_{X}, R_{Y}\). Звідси з~\eqref{eq:intro-swap} до обміну
+	відношення було:
+
+	\begin{equation*}
+		R_{X} \cdot R_{Y} = k
+	\end{equation*}
+
+	Після вкладу нової кількості \(x\) валюти в пару, отримуємо невідому кількість
+	\(y\) з вкладу об'ємом \(R_{X}\). При цьому по правилам протоколу
+	відношення має залишатися незмінимим до і після обміну, тобто дорівнювати тому
+	ж самому \(k\), отже:
+
+	\begin{equation*}
+		(R_{X} + x) \cdot (R_{Y} - y) = k
+	\end{equation*}
+
+	Прирівнянвши обидві рівності, отримаємо:
+
+	\begin{equation}\label{eq:swap-unfinished}
+		\begin{aligned}
+			(R_{X} + x) \cdot (R_{Y} - y) = R_{X} \cdot R_{Y} \\
+			(R_{X} - y) = \frac{R_{X} R_{Y}}{(R_{X} + x)}         \\
+			(R_{Y} - y) = \frac{R_{X} R_{Y}}{(R_{X} + x)}     \\
+			y = R_{Y} - \frac{R_{X} R_{Y}}{(R_{X} + x)}
+		\end{aligned}
+	\end{equation}
+
+	Або з~\eqref{eq:swap-unfinished} більш компактний варіант:
+
+	\begin{equation}
+		\begin{aligned}
+			y = \frac{R_{Y} R_{X} + R_{Y}x - R_{X}R_{Y}}{(R_{X} + x)} \\
+			y = \frac{R_{Y}x}{(R_{X} + x)}
+		\end{aligned}
+	\end{equation}
+\end{proof}
+
+Тепер розглянемо випадок коли існує деяке $0 \leq \rho < 0$ що визначає комісію пари
+(наприклад для UniswapV2 це значення є константним $0.003$ або 0,3\%). Тоді
+формула обміну буде:
+
+\begin{equation*}
+	y = \frac{R_{Y} x \gamma}{R_{X} + x \gamma}
+\end{equation*}
+
+де $\gamma = 1 - \rho$ або:
+
+\begin{equation}\label{eq:swap-fee}
+	y = R_{Y} - \frac{R_{Y} R_{X}}{R_{X} + x \gamma}
+\end{equation}
+
+\subsection{Обмеження функції обміну}\label{sec:swap-limit}
+
+Очевидно, $\Delta x$ має бути меньший за $R_{X}$, тобто $\Delta x \leq R_{X}$, так саме результат
+обміну $\Delta y$ не може бути більшим за $R_{Y}$, тобто $\Delta y \leq R_{Y}$.
+
+\subsection{Графічний зміст порівняння функцій обміну}\label{sec:swap-graph}
+
+На рисунку~\ref{fig:swap-func} зображен приклад функції обміну, її залежність
+від значення $\Delta x$. Розглянемо деякі випадки графічного порівняння таких
+функцій, що залежать від $\Delta x$ однієї валюти та обмінують ту ж саму валюту $Y$,
+проте мають різні значення вкладів.
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[domain=0:4]
+		\begin{axis}%
+			[
+				grid=major,
+				ticks=none,
+				xlabel={\tiny $\Delta x$},
+				ylabel={\tiny $y$},
+				axis x line=left,
+				axis y line=left,
+				no markers,
+				domain=0:1000,
+				restrict y to domain=0:1001
+			]
+			\addplot[thick,samples=400] (x,{1001 - 1001 * 1000/(1000 + 0.97 * x)});
+			% \addplot[thick,samples=400,color=green] (x,{500 - 1000 * 500/(1000 + x)});
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\label{fig:swap-func} Зображення графіку функції обміну}
+\end{figure}
+
+Нехай існують дві різні пари обміну $X/Y$ із $f_{1}(x)$ та $f_{2}(x)$
+відповідно:
+
+\begin{equation*}
+ \begin{aligned}
+  f_{1}(x) = R_{Y} - \frac{R_{Y} R_{X}}{R_{X} + x\gamma} \\
+  f_{2}(x) = R'_{Y} - \frac{R'_{Y} R'_{X}}{R'_{X} + x\gamma}
+ \end{aligned}
+\end{equation*}
+
+де $R_{X}, R_{Y}$ та $R'_{X}, R'_{Y}$ --- це вклади (резерви) у першу та другу
+пару відповідно. Розглянемо спільні точки двох функцій:
+
+\begin{equation*}
+  \begin{aligned}
+	f_{1}(x) &= f_{2}(x) \\
+	R_{Y} - \frac{R_{Y} R_{X}}{R_{X} + x\gamma} &=  R'_{Y} - \frac{R'_{Y} R'_{X}}{R'_{X} + x\gamma} \\
+ \end{aligned}
+\end{equation*}
+
+Вивівши $x$ отримаємо такі корені:
+
+\begin{equation*}
+x_{1} = 0, x_{2} = \frac{R_{Y} R'_{X} - R'_{Y}R_{X}}{(R_{Y} - R'_{Y}) \gamma}
+\end{equation*}
+
+Звідси розглянемо три різні випадки:
+
+\begin{enumerate}
+  \item $R_{Y} \neq R'_{Y}$ та $R_{X} \neq R'_{X}$ --- криві мають точку перетину у
+		$x_{2},x_{1}$ (рис.~\ref{fig:swap-funcs}).
+  \item $R_{Y} = R'_{Y}$ та $R_{X} \neq R'_{X}$ --- криві мають перетин лише у
+  $x = 0$.
+  \item $R_{Y} = R'_{Y}$ та $R_{X} = R'_{X} \implies f_{1} = f_{2}$
+\end{enumerate}
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[domain=0:4]
+		\begin{axis}%
+			[
+				grid=major,
+				ticks=none,
+				xlabel={\tiny $\Delta x$},
+				ylabel={\tiny $\Delta y$},
+				axis x line=left,
+				axis y line=left,
+				no markers,
+				domain=0:1500,
+				restrict y to domain=0:1500
+			]
+			\addplot[thick,samples=400,color=red] (x,{1600 - 1600 * 1000/(1000 + 0.97 * x)});
+			\addplot[thick,samples=400,color=green] (x,{1500 - 900 * 1500/(900 + 0.97 * x)});
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\label{fig:swap-funcs} Зображення графіку функцій обмінів при
+	  $R_{Y} \neq R'_{Y}$ та $R_{X} \neq R'_{X}$ }
+\end{figure}
+
+У першому випадку існує така точка $x_{2}$ після котрої одна з кривих більша за
+іншу, і до котрої меньша за іншу. Тобто об'єм результату обміну з $f_{1}$ стає
+більшим за $f_{2}$ або навпаки. Достатньо легко перевірити яка саме через
+нерівність:
+
+\begin{equation*}
+  f_{1}(x_{2} + \varepsilon) > f_{2}(x_{2} + \varepsilon)
+\end{equation*}
+
+\subsection{Композиція функцій обміну}\label{sec:func-composition}
+
+Перед наступним розділом пропонуємо розглянути властивості та сутність
+композицій функцій обміну. Нехай необхідно знайти об'єм обміну \(X \implies Y\),
+з~\eqref{eq:swap-fee} це буде:
+
+\begin{equation*}
+	y = f_{X/Y}(x) = R_{Y} - \frac{R_{Y} R_{X}}{R_{X} + x \gamma}
+\end{equation*}
+
+Обмін \(Y \implies Z\):
+
+\begin{equation*}
+	z = f_{Y/Z}(y) = R_{Z} - \frac{R_{Z} R_{Y}}{R_{Y} + y \gamma}
+\end{equation*}
+
+Зафіксуємо об'єм $\Delta x$ валюти $X$ для отримання $\Delta y$ валюти $Y$:
+
+\begin{equation}\label{eq:swap_xy}
+	\Delta y = f_{X/Y}(\Delta x)
+\end{equation}
+
+І для наступного $\Delta y$ на $\Delta z$:
+
+\begin{equation*}
+	\Delta z = f_{Y/Z}(\Delta y)
+\end{equation*}
+
+З~\eqref{eq:swap_xy}:
+
+\begin{equation*}
+	\Delta z = f_{Y/Z}(\Delta y) = f_{Y/Z}(f_{X/Y}(\Delta x)) = (f_{X/Y} \circ f_{Y/Z})(\Delta x)
+\end{equation*}
+
+Звідси робимо висновок що композиція функція обміну, є аналогічним до обміну по
+парам цих функцій.
+
+\subsection{Об'єм отримуємий при \(n\)-тій кількості переходів.}\label{sec:nth-swap}
+
+У кінцевій задачі ми будемо розглядати переходи між \(n\)-тою кількістю валют:
+
+\begin{lemma} Нехай, \(R_{C_{i}}\) --- об'єм вкладів пари \textbf{на котру} ми
+  вносимо валюту \(C_i\), а \(R_{C_{i+1}}\) --- об'єм вкладів пари \textbf{з
+	котрої} ми виносимо валюту \(C_{i+1}\) при \(i\)-тому обміні, де
+  \(i = \overline{0, n}\). Тоді об'єм обміну
+  \(C_{0} \implies C_{1} \ldots \implies C_{n-1} \implies C_{n} \) при вхідному
+  \(x\):
+
+  \begin{equation}\label{eq:nth-swap}
+	\begin{aligned}
+	  y &= (f_{C_{0}/C_{1}} \circ f_{C_{1}/C_{2}} \circ \ldots f_{C_{i}/C_{i+1}})(x) = \\
+	  &= x \prod_{i=1}^n R_{C_{i+1}} \div \left( \prod_{i=1}^{n} R_{C_{i}} + x \sum_{i=0}^{n-1} \left( \prod_{k=1}^i R_{C_{i+1}} \cdot \prod_{j=i+2}^{n}  R_{C_{i}} \right) \right)
+	\end{aligned}
+	\end{equation}
+\end{lemma}
+
+% Поки закометовано, бо не встиг довести.
+% \begin{proof}
+% Нехай, \(a_{X/Y}\) - кількість вкладів валюти \(X\) у пару \(X/Y\), \(b_{X/Y}\)
+% -- кількість вкладів валюти \(Y\) у пару \(X/Y\), \(a_{Y/Z}\) - кількість
+% вкладів валюти \(Y\) у пару \(Y/Z\), \(b_{Y/Z}\) - кількість вкладів валюти
+% \(Z\) у пару \(Y/Z\).
+%
+% Тоді, з формули \eqref{eq:swap} ми можемо отримати кількість \(y\) валюти \(Y\) при
+% вкладанні \(x\) валюти \(X\) у пару \(X/Y\):
+%
+% \begin{equation}
+% y(x) = \frac{b_{X/Y}x}{(a_{X/Y} + x)}
+% \end{equation}
+%
+% Розглянемо випадок коли \(y\) валюти \(Y\) вкладено у пару \(Y/Z\):
+%
+% \begin{equation*}
+% z(y) = \frac{b_{Y/Z}y}{(a_{Y/Z} + y)}
+% \end{equation*}
+%
+% Підставивши \(y(x)\) у \(z(y)\) отримаємо залежність \(z(x)\) від \(x\):
+%
+% \begin{equation*}
+% \begin{aligned}
+% z \circ y = z(y(x)) = \frac{b_{Y/Z}y(x)}{(a_{Y/Z} + y(x))} = \\
+% \frac{b_{Y/Z} \frac{b_{X/Y}x}{(a_{X/Y} + x)}}{(a_{Y/Z} + \frac{b_{X/Y}x}{(a_{X/Y} + x)})} = \\
+% \frac{b_{Y/Z}b_{X/Y}x}{(a_{X/Y} + x)(a_{Y/Z} + \frac{b_{X/Y}x}{(a_{X/Y} + x)})} = \\
+% \frac{b_{X/Y}b_{Y/Z}x}{a_{X/Y} a_{Y/Z}  + (a_{Y/Z} + b_{X/Y}) x}
+% \end{aligned}
+% \end{equation*}
+%
+% Намагаючись знайти деяку закономірність, спробуємо розглянути ще один перехід
+% \(Z \implies W\):
+%
+% \begin{equation*}
+% w(z) = \frac{b_{Z/W}z}{(a_{Z/W} + z)}
+% \end{equation*}
+%
+% Підставимо і його:
+%
+% \begin{equation*}
+% \begin{aligned}
+% w \circ z \circ y &= w(z(y(x))) = \frac{b_{Z/W}z(y(x))}{(a_{Z/W} + z(y(x)))} \\
+% &= \frac{b_{Z/W} \frac{b_{X/Y}b_{Y/Z}x}{a_{X/Y} a_{Y/Z}  + (a_{Y/Z} + b_{X/Y}) x}}{(a_{Z/W} + \frac{b_{X/Y}b_{Y/Z}x}{a_{X/Y} a_{Y/Z}  + (a_{Y/Z} + b_{X/Y}) x})} \\
+% &= \frac{b_{Z/W}b_{X/Y}b_{Y/Z}x}{a_{X/Y} a_{Y/Z} a_{Z/W} + (a_{Y/Z} a_{Z/W} + b_{X/Y} a_{Z/W} + b_{Y/Z} b_{X/Y}) x}
+% \end{aligned}
+% \end{equation*}
+%
+% Достатньо легко побачити, що у чисельнику утворюється добуток вкладів пари \textbf{на
+% котру} ми обмінюємо, а у знаменику першим доданком добуток всіх вкладів \textbf{котрі}
+% ми обмінюємо. Не очевидним залишається сума біля \(x\) у знаменику.
+% \end{proof}
+
+Так як $R_{C_{i}}$ є константами як і їх добуток та сума, зробивши заміну вигляду:
+
+\begin{equation}\label{eq:swap-omega-xi}
+\begin{aligned}
+  R_{\Omega} &= \prod_{ia=1}^n R_{C_{i+1}} \\
+  R_{\Xi} &= \sum_{i=0}^{n-1} \left( \prod_{k=1}^i R_{C_{i+1}} \cdot \prod_{j=i+2}^{n}  R_{C_{i}} \right)
+\end{aligned}
+\end{equation}
+
+Отримаємо функцію обміну:
+
+\begin{equation*}
+y = \frac{x R_{\Omega}}{R_{\Omega} + x R_{\Xi}}
+\end{equation*}
+
+Таким чином, рівняння~\eqref{eq:nth-swap} зберігає всі властивості функції
+обміну.
+
+Результат дозволяє в один математичний вираз описати декілька переходів, проте
+при обрахуванні методами програмного забезпечення добутки вкладів можуть бути
+настільки великими числами (навіть два обміни між парами із вкладами по \(10^6\)
+утворює числа \({(10^6)}^3\)), що при використанні чисел із обмеженою точністю
+можуть утворювати переповнення.
+
+На момент написання цієї роботи, максимальний розмір регістра
+середньостатистичного комерційного комп'ютера скаладав 64 біта, де максимальне
+значення числа без знаку становить \(2^{64} < 10^{20}\).
+
+\newpage
+
+\section{Формалізація графа}
+
+Так як головною метою цієї роботи є опис загального алгоритму для знаходження
+найоптимальнішого шляху для обміну, ми спробуємо формалізувати визначення ваги у
+графі \(G_{t} = (V_{t}, E_{t})\).
+
+Розглянувши формулу обміну~\eqref{eq:swap} ми можемо побачити гіперболічну
+залежність вкладів однієї валюти від іншої.
+
+Чим більшим ми вкладаємо валюти \(X\) тим більшим стає його відношення із \(Y\),
+тим самим чим більше існує валюти \(X\) тим менш вона ціна відносно \(Y\) за
+мінімальну одиницю, тим самим AMM біржі балансують ціни.
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}
+
+		\node (x) at (0, -1) {X};
+		\node (y) at (4, 0) {Y};
+		\node (z) at (8, 0) {Z};
+		\node (w) at (4, -2) {W};
+
+		\draw[->] (x) to node [above, sloped] {\(f_{X/Y}(x)\)} (y);
+		\draw[->] (y) to node [above] {\(f_{Y/Z}(x)\)} (z);
+		\draw[->] (x) to node [below,sloped] {\(f_{X/W}(x)\)} (w);
+
+	\end{tikzpicture}
+	\caption{Графічне представлення графу біржи}\label{fig:amm-graph}
+\end{figure}
+
+Більшість сучасних алгоритмів знаходження оптимального шляху між всіма парами
+(all-to-all по класифікації~\cite{deo1980shortest}) потребують аби вага ребра
+була дійсною функцією від двох вершин $f: (V, V) \to \mathbb{R}$, проте у нашому випадку
+розглядаєма вага ребра залежить від теперішніх вкладів у вершини та об'єму
+обміну. Спробуємо розглянути можливі випадки переведення нашої задачі до
+стандартної із можливістю ``сумувати'' ваги, та порівнювати їх між собою.
+
+\subsection{Обчислення ваги при фіксованому об'ємі}\label{sec:weight-non-fixed}
+
+Зафіксуємо стан графу при деякому $t$, таким чином розміри вкладів у функції
+обміну стають константами, проте об'єми обміну все ще є невідомим значенням.
+Тому нехай для пари $X/Y$ зафіксуємо об'єм обміну як відоме $x$.
+
+Таким чином всі функції обміну на будь-якому з можливих шляхів між $X$ та $Y$
+обчислюються у дійсні значення з $\mathbb{R}^{+}$ за допомогою, наприклад,
+~\eqref{eq:nth-swap}. Проте при обході графа утворенні значення неможна
+порівнювати допоки шлях з $X$ в $Y$ не дійде докінця.
+
+Нехай стан біржи на момент $t$ має вигляд як на~\ref{fig:eval-func-graph}. Для
+знаходження ``найкоротшого'' шляху (у нашому випадку шляху при котрому ми за $X$
+отримаємо якомога більше $Y$) у подібному графі здавалося б можна використати,
+наприклад, алгоритм Дейкстри~\cite{dijkstra} так як на цей раз всі значення ваг
+є просто числами. Проте, якщо розглянути $S_{X/W}$ та $S_{X/Z}$, то достатньо
+легко зрозуміти, що значення об'єму цих обмінів не можна порівнювати так як вони
+є зовсім різними валютами.
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}
+
+		\node (x) at (0, -1) {X};
+		\node (z) at (4, 0) {Z};
+		\node (y) at (8, -1) {Y};
+		\node (w) at (4, -2) {W};
+
+		\draw[->] (x) to node [above,sloped] {\(S_{X/Z}\)} (z);
+		\draw[->] (z) to node [above,sloped] {\(S_{Z/Y}\)} (y);
+		\draw[->] (x) to node [below,sloped] {\(S_{X/W}\)} (w);
+		\draw[->] (w) to node [below,sloped] {\(S_{W/Y}\)} (y);
+
+	\end{tikzpicture}
+	\caption{Графічне представлення двох можливих шляхів обміну між $X$ та $Y$
+		при фіксованому $x$. $S_{X/Y}$ --- це значення отримуємої валюти $Y$ за
+		фіксонану кількість $x$ валюти $X$}\label{fig:eval-func-graph}
+\end{figure}
+
+Не рідко на біржах існує валюта до котрої можна перевести будь яку іншу на
+платформі. Наприклад на фіатних біржах чи біржах ціних паперів --- це може бути
+долар, а на криптобіржах нативна валюта мережі (ethereum, bitcoin).
+
+\begin{lemma}
+	Тому пропонується розглянути два припущення:
+
+	\begin{itemize}
+		\item Якщо в такій ситуації існує пара обміну між $W$ та $Z$, то через неї
+		      ми можемо привести номінал одного значення в інший аби порівняти
+		      значення.
+		\item Якщо на біржі присутня ``базова'' валюта, до котрої можна перевести
+		      будь-яку іншу, то можна перевести обидві валюти в одну ``базову'' для
+		      порівняння.
+	\end{itemize}
+\end{lemma}
+
+Таким чином послідовність дій для порівняння ребер можна описати
+алгоритмом~\ref{alg:cap}. Приклад графу після алгортму є
+рисунок~\ref{fig:eval-func-graph-base}.
+
+\begin{algorithm}
+\caption{Алгоритм знаходження ваги ребра}\label{alg:cap}
+\begin{algorithmic}
+\Function{swap}{$\Delta x$, $X$, $Y$} \Comment{Об'єм обміну між вершинами $X$ та $Y$}
+\EndFunction{}
+\Function{choose}{$X$} \Comment{Вибрати як наступний шлях обміну $X$}
+\EndFunction{}
+\Ensure{$V_{t}$} \Comment{множина вершин графа}
+\Ensure{$E_{t}$} \Comment{множина ребер}
+\Ensure{$v_{i+1} \in V_{t}$} \Comment{перша вершина через котру проходить шлях}
+\Ensure{$v_{j+1} \in V_{t}$} \Comment{друга вершина з котрою порівнюється шлях}
+\Ensure{$v_{base} \in V_{t}$} \Comment{вершина базової валюти біржі}
+\Require{$\Delta x > 0$}
+\State{$volume_{left} \gets 0$}
+\State{$volume_{right} \gets 0$}
+\If{$(v_{i+1}, v_{j+1}) \in  E_{t}$}
+	\State{$volume_{tmp} \gets \Call{swap}{\Delta x, v_{i}, v_{i+1}}$}
+  	\State{$volume_{left} \gets \Call{swap}{volume_{tmp}, v_{i+1}, v_{j+1}}$}
+	\State{$volume_{right} \gets \Call{swap}{\Delta x, v_{j}, v_{j+1}}$}
+  \ElsIf{$(v_{base}, v_{i+1}) \in E_{t} \land (v_{base}, v_{j+1}) \in E_{t}$ }
+	\State{$volume_{left} \gets \Call{swap}{\Delta x, v_{base}, v_{i+1}}$}
+	\State{$volume_{right} \gets \Call{swap}{\Delta x, v_{base}, v_{j+1}}$}
+  \EndIf{}
+  \If{$volume_{left} < volume_{right}$}
+	$\Call{choose}{v_{j+1}}$
+  \Else{}
+	$\Call{choose}{v_{i+1}}$
+  \EndIf{}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}
+
+		\node (x) at (0, -1) {X};
+		\node (z) at (4, 0) {Z};
+		\node (y) at (8, -1) {Y};
+		\node (w) at (4, -2) {W};
+
+		\draw[->] (x) to node [above,sloped] {\(S_{X/Z/base}\)} (z);
+		\draw[->] (z) to node [above,sloped] {\(S_{Z/Y/base}\)} (y);
+		\draw[->] (x) to node [below,sloped] {\(S_{Z/W/base}\)} (w);
+		\draw[->] (w) to node [below,sloped] {\(S_{W/Y/base}\)} (y);
+
+	\end{tikzpicture}
+	\caption{\label{fig:eval-func-graph-base} Графічне представлення двох можливих
+	  шляхів обміну між $X$ та $Y$ при фіксованому $x$. $S_{base}$ --- значення
+	  отримуєме при обміні що переведенне до базовох валюти}
+\end{figure}
+
+Для переведення задачі до стандартної для використання алгоритмів обходу графа
+достатньо за вагу обчислити різницю минулого отриманого значення і теперішнього
+(рис.~\ref{fig:eval-func-graph-weight}). Тобто, якщо $S_{i}$ --- об'єми призведені
+до базових на шляху між валютами, то ваги будуть:
+
+\begin{equation*}
+W_{i} = S_{i} - S_{i-1}, S_{0} = 0
+\end{equation*}
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}
+
+		\node (x) at (-2, -1) {X};
+		\node (z) at (4, 0) {Z};
+		\node (y) at (10, -1) {Y};
+		\node (w) at (4, -2) {W};
+
+		\draw[->] (x) to node [above,sloped] {\(S_{X/Z/base} - 0\)} (z);
+		\draw[->] (z) to node [above,sloped] {\(S_{Z/Y/base} - S_{X/Z/base}\)} (y);
+		\draw[->] (x) to node [below,sloped] {\(S_{Z/W/base} - 0\)} (w);
+		\draw[->] (w) to node [below,sloped] {\(S_{W/Y/base} - S_{Z/W/base}\)} (y);
+
+	\end{tikzpicture}
+	\caption{\label{fig:eval-func-graph-weight} Графічне представлення двох
+	  можливих шляхів обміну між $X$ та $Y$ при фіксованому $x$ після
+	  переведення задачі до стандартної}
+\end{figure}
+
+\subsection{Спрощення графа при нефіксованому об'ємі}
+
+При нефіксованому об'ємі спробуємо розглянути преоптимізації графа, що
+допоможуть спросити пошук при невідомому $\Delta x$.
+
+Розглянемо два шляхи, котрі утворилися при обході графа:
+
+\begin{equation*}
+ \begin{aligned}
+   C_{0} \implies \ldots \implies C_{j} \\
+   C_{0} \implies \ldots \implies C_{i}
+ \end{aligned}
+\end{equation*}
+
+Обидва вони починаються з однієї вершини та закінчуються на відмінних, проте як
+і в розділі~\ref{sec:weight-non-fixed}, доповнимо шляхи переведенням до базової
+вершини:
+
+\begin{equation*}
+ \begin{aligned}
+   C_{0} \implies \ldots \implies C_{j} \implies C_{base}\\
+   C_{0} \implies \ldots \implies C_{i} \implies C_{base}
+ \end{aligned}
+\end{equation*}
+
+При не фіксованому об'ємі функція обміну залишається залежною від $x$ і
+оперувати конкретними значеннями для сумування ваги шляхів ми не можемо. Проте з
+розділів~\ref{sec:func-composition}~та~\ref{sec:nth-swap} відомо, що композиція
+функцій обміну по шляху утворює функцію обміну між початковою та кінцевою
+вершиною:
+
+\begin{equation*}
+ \begin{aligned}
+   (f_{C_{0}/C_{1}} \circ \ldots f_{C_{j}/C_{base}})(x) = f_{C_{0}/C_{base}}^{1}(x)\\
+   (f_{C_{0}/C_{1}} \circ \ldots f_{C_{i}/C_{base}})(x) = f_{C_{0}/C_{base}}^{2}(x)
+ \end{aligned}
+\end{equation*}
+
+З розділу~\ref{sec:swap-graph} відомо, що для таких функцій з резервами
+$R_{\Omega}, R_{\Xi}, R'_{\Omega}, R'_{\Xi}$ утворених аналогічно до заміни
+з~\eqref{eq:swap-omega-xi} можливо розглянути три випадки.
+
+\begin{enumerate}
+  \item $R_{\Xi} = R'_{\Xi}$ та $R_{\Omega} = R'_{\Omega} \implies f_{1} = f_{2}$ --- варто
+		залишити обидва шляхи і переходити на наступні вершини.
+  \item $R_{\Xi} = R'_{\Xi}$ та $R_{\Omega} \neq R'_{\Omega}$ --- криві мають перетин лише у
+		$x = 0$, тобто
+		$\forall x > 0 \, f_{C_{0}/C_{base}}^{1}(x) > f_{C_{0}/C_{base}}^{2}(x)$ або
+		$\forall x > 0 \, f_{C_{0}/C_{base}}^{2}(x) > f_{C_{0}/C_{base}}^{1}(x)$. Варто
+		залишити лише один з шляхів що є завжди більшим.
+  \item $R_{\Xi} \neq R'_{\Xi}$ та $R_{\Omega} \neq R'_{\Omega}$ --- варто залишити обидва шляхи,
+		враховуючи, що при $\Delta x > x_{2}$ кращим є шлях через $C_{i}$ (або
+		$C_{j}$).
+\end{enumerate}
+
+У третьому випадку при обході можуть утворюватися такі точки перетину кривих
+$\exists x_{2}, x'_{2}$, що $\left(0, x_{2}\right) \cap{} \left(x'_{2}, \infty{} \right) = \emptyset$,
+і з обмеженнями з розділу~\ref{sec:weight-non-fixed}, утворюються несумісні
+умови при котрих лише одна наступна вершина є правильною, або жодна. Завдяки
+чому можна спростити граф позбувшися таких шляхів при котрих обмін неможливий
+взагалі через відсутніть ліквідності в парах.
+
+\newpage
+
+\section{Імплементація програми}
+
+У цьому розділі ми розглянемо структуру програми що імлементує алгоритм пошуку
+оптимального шляху між вершинами біржевого графа на прикладі UniswapV2 в мережі
+Ethereum~\cite{ethereum}.
+
+\subsection{Об'єкти та сутності програми}
+
+У цьому розділі показана спрощена діаграма взаємозв'язків даних та сутностей, що
+використовує програма.
+
+\subsubsection{Блоки}
+
+Події в криптовалютній мережі Ethereum є послідовними, і збираються учасниками в
+блоки що йдуть один за одним. Кожен блок у мережі починаючи з першого має свій
+порядковий номер, що також називається ``висотою'' блока.
+
+Так як зміни стану графа залежать від подій у блоках, замість непервного часу
+$t$ імплементація використовує дискретне значення висоти блоку $t \in \mathbb{N}_{0}$ у котрому
+сталося оновлення даних, що в деяких випадках значно спрощує імлементацію і
+дозволяє прив'язати дані до конкретної висоти.
+
+\subsubsection{Токени}
+
+Токен (з англ. \textit{token}) --- є смартконтрактом стандарту ERC20~\cite{erc20}
+сукупністю інформації про валюту в криптобіржі, починаючи з її унікальної адреси
+в мережі, закінчуючи її назвою та коротким символьним кодом. Фактично сукупність
+токенів в программі це множина вершин біржевого графа $E_{t}$, де унікальність
+валюти забезпечується унікальністю адреси в мережі.
+
+\subsubsection{Пари}
+
+Пара --- це сматрконтракт, що створюється біржою на конкретному блоці як зв'язок
+двух токенів, і що тримає в собі ліквідність вкладників (резерви) для створення
+обмінів. Так як це зв'язок двух токенів, сукупність всіх пар є множиною ребер
+$V_{t}$ з вершин $E_{t}$.
+
+Аналогічно резерви є вагою ребер, ліквідністю у токенах з обох сторін пари, що
+зберігається як пара чисел.
+
+\subsubsection{Діаграма зв'язків}
+
+Приклад створення бази даних за допомогою SQL можна побачити у
+ДОДАТКУ~А~\ref{sec:addition-a}.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}[auto,node distance=1cm]
+	\node[entity] (pairs)   {Пара};
+	\node[entity] (tokens)   [right = of pairs] {Токен};
+
+	\node[entity] (blocks) at (0.0, 6.0) {Блок};
+	\node[relationship] (pair_created_on) [above = of pairs] {Створена на}
+		edge (pairs)
+		edge (blocks);
+	\node[entity] (reserves) [left = of pairs] {Резерви};
+  \end{tikzpicture}
+  \caption{\label{fig:label}Спрощена ER діаграма зв'язків у БД}
+\end{figure}
+
+\subsection{Збір данних}
+
+Перед початком роботи програмі необхідно зібрати всі необхідні дані
+
+\subsection{Алгоритм спрощення графа}
+
+\subsection{Алгоритм пошуку оптимального шляху при фіксованому об'ємі}
+
+\newpage
+
+\section{ВИСНОВКИ}
+
+\newpage
+
+\printbibliography{}
+\newpage
+
+\section*{ДОДАТОК А}\label{sec:addition-a}
+
+У цьому додатку наведений приклад SQL коду для оформлення бази даних у
+імплементації даного алгоритму.
+
+Таблиця блоків \texttt{blocks}:
+
+\begin{verbatim}
+CREATE TABLE blocks (
+    height BIGINT   PRIMARY KEY,
+    hash   CHAR(66) NOT NULL UNIQUE
+);
+\end{verbatim}
+
+Таблиця токенів \texttt{tokens}:
+
+\begin{verbatim}
+CREATE TABLE tokens (
+    id SERIAL PRIMARY KEY,
+
+    address CHAR(42) NOT NULL UNIQUE,
+
+    name   TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+);
+\end{verbatim}
+
+Таблиця пар \texttt{pairs}:
+
+\begin{verbatim}
+CREATE TABLE IF NOT EXISTS pairs (
+    id      SERIAL   PRIMARY KEY,
+    address CHAR(42) NOT NULL UNIQUE,
+    token0  INTEGER  NOT NULL,
+    token1  INTEGER  NOT NULL,
+    block 	INTERGER NOT NULL,
+
+    FOREIGN KEY (token0) REFERENCES tokens(id),
+    FOREIGN KEY (token1) REFERENCES tokens(id),
+    FOREIGN KEY (block)  REFERENCES blocks(height),
+);
+\end{verbatim}
+
+Таблиця резервів \texttt{reserves}:
+
+\begin{verbatim}
+CREATE TABLE IF NOT EXISTS reserves (
+    id    SERIAL  PRIMARY KEY,
+    pair  INTEGER NOT NULL,
+    block INTEGER NOT NULL,
+
+    reserve0 NUMERIC NOT NULL,
+    reserve1 NUMERIC NOT NULL,
+
+    FOREIGN KEY (pair)  REFERENCES pairs(id),
+    FOREIGN KEY (block) REFERENCES blocks(height)
+);
+\end{verbatim}
+
+
+\end{document}
