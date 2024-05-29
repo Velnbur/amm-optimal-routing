@@ -17,29 +17,29 @@
 
         buildPdf = { name, run-biber ? true }:
           let
-            runBiberShell = if run-biber then ''
-              biber $FLAGS ${name}.bcf
-              xelatex $FLAGS ${name}.tex
-            '' else
-              "";
+            runXelatex = ''
+              xelatex $FLAGS ${name}/index.tex
+            '';
+            runBiber = ''
+              biber $FLAGS ${name}.out/index.bcf
+              ${runXelatex}
+            '';
+            runBiberOptional = if run-biber then runBiber else "";
           in pkgs.writeShellScriptBin "build-pdf-${name}" ''
             #!${pkgs.stdenv.shell}
-
             set -e
-
             mkdir -p ${name}.out
 
             export FLAGS="-output-directory=${name}.out"
-            run_biber=${runBiberShell}
 
-            xelatex $FLAGS ${name}.tex
-            ${runBiberShell}
+            ${runXelatex}
+            ${runBiberOptional}
           '';
 
       in rec {
         packages = {
           default = self.packages.index;
-          index = buildPdf { name = "index"; };
+          paper = buildPdf { name = "paper"; };
           presentation = buildPdf {
             name = "presentation";
             run-biber = false;
