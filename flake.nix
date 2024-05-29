@@ -15,23 +15,36 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
-        buildPdf = { name }:
-          pkgs.writeScript "build-pdf" ''
+        buildPdf = { name, run-biber ? true }:
+          let
+            runBiberShell = if run-biber then ''
+              biber $FLAGS ${name}.bcf
+              xelatex $FLAGS ${name}.tex
+            '' else
+              "";
+          in pkgs.writeShellScriptBin "build-pdf-${name}" ''
             #!${pkgs.stdenv.shell}
 
-            set -eux
+            set -e
 
             mkdir -p ${name}.out
 
             export FLAGS="-output-directory=${name}.out"
+            run_biber=${runBiberShell}
 
             xelatex $FLAGS ${name}.tex
-            biber $FLAGS ${name}.out/${name}.bcf
-            xelatex $FLAGS ${name}.tex
+            ${runBiberShell}
           '';
 
       in rec {
-        packages.default = buildPdf { name = "index"; };
+        packages = {
+          default = self.packages.index;
+          index = buildPdf { name = "index"; };
+          presentation = buildPdf {
+            name = "presentation";
+            run-biber = false;
+          };
+        };
 
         devShells.default = pkgs.mkShell {
           buildInputs = (with pkgs; [ texliveFull ]);
