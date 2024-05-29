@@ -1,6 +1,9 @@
 \documentclass{beamer}
 \usetheme{Boadilla}
 
+\usepackage{standalone}
+\usepackage[table]{xcolor}
+
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
 
@@ -32,10 +35,11 @@
 \titlepage{}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Що таке АММ?}
-
-  АММ (або автоматизовані маркет мейкери) --- це підхід у фінансовій сфері
-\end{frame}
+\input{presentation/frames/01_what_is_amm}
+\input{presentation/frames/02_what_the_difference_between_order_books.tex}
+\input{presentation/frames/03_amm_clisification.tex}
+\input{presentation/frames/04_amm_dex_structure.tex}
+\input{presentation/frames/05_search_problem.tex}
+\input{presentation/frames/06_solution.tex}
 
 \end{document}

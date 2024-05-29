@@ -1,0 +1,66 @@
+\documentclass[beamer]{standalone}
+
+\begin{document}
+
+\begin{frame}\frametitle{У чому різниця між АММ та біржами на ордер буках?}
+  \begin{block}{Order Book}
+    Ордер Буки (з англ. \textit{order book}) --- це список заявок на купівлю та
+    продаж активу, що відображається у вигляді таблиці з ціною та об'ємом.
+  \end{block}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{table}
+      \begin{tabular}{ c | c }
+        Об'єм & Ціна \\
+        \hline \hline
+        1 & 10,0 \\
+        \rowcolor{red} 2 & 9,95 \\
+        3 & 9,87 \\
+        4 & 9,71
+      \end{tabular}
+      \caption{Таблиця на купівлю}
+    \end{table}
+    \column{0.5\textwidth}
+    \begin{table}
+      \begin{tabular}{ c | c }
+        Ціна & Об'єм \\
+        \hline \hline
+        10,1 & 1 \\
+        \rowcolor{green} 9,95 & 2 \\
+        10,3 & 3 \\
+        10,4 & 4
+      \end{tabular}
+      \caption{Таблиця на продаж}
+    \end{table}
+  \end{columns}
+\end{frame}
+
+\begin{frame}\frametitle{У чому різниця між АММ та біржами на ордер буках?}
+  АММ для додатнього вектору вхідних об'ємів $\Delta \mathbf{x} \in \mathbb{R}^{n}$ та
+  вихідних $\Delta \mathbf{y} \in \mathbb{R}^{n}$ визначає функцію
+  $f(\Delta \mathbf{x}, \Delta \mathbf{y})$ над цими вкладами, що відповідає за визначення
+  коректності трейду по правилам AMM.
+
+  У випадку, якщо для даних $\Delta \mathbf{x}$ та $\Delta \mathbf{y}$ трейд вважається
+  некоректним, то обмін не стається.
+\end{frame}
+
+\begin{frame}\frametitle{У чому різниця між АММ та біржами на ордер буках?}
+  \begin{block}{Чим АММ краща за ордер буки?}
+    \begin{itemize}
+      \item Прозорість
+      \item Детермінованість
+      \item Простота в імплементації
+    \end{itemize}
+  \end{block}
+
+  На цій моделі трейдингу побудовано багато децентралізованих бірж, таких як:
+
+  \begin{itemize}
+    \item Uniswap
+    \item Curve
+    \item SushiSwap
+  \end{itemize}
+\end{frame}
+
+\end{document}
