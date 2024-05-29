@@ -1,0 +1,166 @@
+\documentclass[../index.tex]{subfiles}
+
+\begin{document}
+У цьому розділі ми розглянемо структуру програми що імлементує алгоритм пошуку
+оптимального шляху між вершинами біржевого графа на прикладі UniswapV2 в мережі
+Ethereum~\cite{ethereum}.
+
+\subsection{Об'єкти та сутності програми}
+
+У цьому розділі показана спрощена діаграма взаємозв'язків даних та сутностей, що
+використовує програма.
+
+\subsubsection{Блоки}
+
+Події в криптовалютній мережі Ethereum є послідовними, і збираються учасниками в
+блоки що йдуть один за одним. Кожен блок у мережі починаючи з першого має свій
+порядковий номер, що також називається ``висотою'' блока.
+
+Так як зміни стану графа залежать від подій у блоках, замість непервного часу
+$t$ імплементація використовує дискретне значення висоти блоку $h \in \mathbb{N}_{0}$ (і
+надалі в анотаціях буде використовуватися саме $h$ від англ. ``height'') у
+котрому сталося оновлення даних, що в деяких випадках значно спрощує
+імлементацію і дозволяє прив'язати дані до конкретної висоти.
+
+\subsubsection{Токени}
+
+Токен (з англ. \textit{token}) --- є смартконтрактом стандарту ERC20~\cite{erc20}
+сукупністю інформації про валюту в криптобіржі, починаючи з її унікальної адреси
+в мережі, закінчуючи її назвою та коротким символьним кодом. Фактично сукупність
+токенів в программі це множина вершин біржевого графа $E_{h}$, де унікальність
+валюти забезпечується унікальністю адреси в мережі.
+
+\subsubsection{Пари}
+
+Пара --- це сматрконтракт, що створюється біржою на конкретному блоці як зв'язок
+двух токенів, і що тримає в собі ліквідність вкладників (резерви) для створення
+обмінів. Так як це зв'язок двух токенів, сукупність всіх пар є множиною ребер
+$V_{h}$ з вершин $E_{h}$.
+
+\subsubsection{Резерви}
+
+Аналогічно резерви є ``\textit{вагою}'' ребер, ліквідністю у токенах з обох сторін пари, що
+зберігається як пара чисел у множині $\mathbf{R}_{h}$. Тобто:
+
+\begin{equation*}
+\mathbf{R}_{h} = \{ \{R_{X}, R_{Y}\}: (X \in V_{h} \land Y \in V_{h}) \land (X, Y) \in E_{h} \}
+\end{equation*}
+
+\subsubsection{Діаграма зв'язків}
+
+На рисунку~\ref{fig:er-db} показана спрощена діаграма зв'язків об'єктів, що були
+зазначені вище. Приклад коду що створює базу данних з такими зв'язками на мові
+програмування SQL можна побачити у додатку~А~\ref{sec:addition-a}.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}[auto,node distance=1cm]
+    \node[entity] (pairs)  at (0.0, 10.0) {Пара};
+    \node[attribute] (pairs_token0) [above left = of pairs] {Токен 0}
+        edge (pairs);
+    \node[attribute] (pairs_token1) [above right = of pairs] {Токен 1}
+        edge (pairs);
+
+    \node[entity] (blocks) at (0.0, 2.0)  {Блок};
+    \node[attribute] (blocks_height) [below = of blocks] {Висота}
+        edge (blocks);
+    \node[relationship] (pair_created_on) [below = of pairs] {Створена на висоті};
+
+    \path (pairs) edge node {m} (pair_created_on);
+    \path (blocks) edge node {1} (pair_created_on);
+
+    \node[entity] (reserves) at (-10.0, 10.0) {Резерви};
+    \node[attribute] (reserves_Rx)  at (-8.0, 12.0) {$R_{1}$}
+        edge (reserves);
+    \node[attribute] (reserves_Ry)  at (-12.0, 12.0) {$R_{0}$}
+        edge (reserves);
+
+    \node[relationship] (reserves_on_height) [below = of reserves] {Значення на висоті};
+
+    \path (reserves) edge node {m} (reserves_on_height);
+    \path (blocks) edge node {1} (reserves_on_height);
+
+    \node[relationship] (reserves_of_pair) at (-5.0, 10.0) {Значення пари}
+        edge (reserves)
+        edge (pairs);
+
+    \path (reserves) edge node {m} (reserves_of_pair);
+    \path (pairs) edge node {1} (reserves_of_pair);
+
+    \node[entity] (tokens)   [right = of pairs] {Токен};
+    \node[relationship] (token_of_pair) [below = of tokens] {Токен пари}
+        edge (tokens)
+        edge (pairs);
+
+    \path (tokens) edge node {m} (token_of_pair);
+    \path (pairs) edge node {m} (token_of_pair);
+  \end{tikzpicture}
+  \caption{\label{fig:er-db}Спрощена ER діаграма зв'язків об'єктів}
+\end{figure}
+
+\subsection{Збір данних}
+
+Перед початком роботи, програмі необхідно на зафіксованому блоці $h$ вивантажити
+всі необхідні дані з мережі про: існуючі пари, їх резерви та токени з котрих
+вони складаються. Для цього у UniswapV2 існує так званиий контракт-фабрика
+(див. \texttt{UniswapV2Factory}), що дозволяє користувачам створювати нові пари, та що
+має бієктивне відображення між номерами всіх існуючих пар та їх адресами в
+мережі через метод \texttt{getPair}.
+
+У пари присутні методи \texttt{getReserves}, \texttt{token0} та \texttt{token1},
+що повертають резерви та токени пари відповідно, та котрі можна викликати знаючи
+адресу пари в мережі. Завдяки \texttt{getPair} програма послідовно ітерується по
+всім парам починаючи з першої та отримує їх адреси. З кожної адреси завдяки
+\texttt{getReserves}, \texttt{token0} та \texttt{token1} отримує інформацію про
+вершини, ребра та резерви та оновлює множини $V_{h}$, $E_{h}$, $\mathbf{R}_{h}$. Приклад
+псевдокоду навeдений у алгоритму~\ref{alg:init}, приклад імлементації мовою
+програмування Rust~\cite{matsakis2014rust} можна знайти за
+посиланням~\cite{Baibula_Constant_Product_Market_2024}.
+
+\begin{algorithm}
+\caption{Алгоритм збору даних та ініціалізації стану біржі}\label{alg:init}
+\begin{algorithmic}
+\Require{$N \in \mathbb{N}$} \Comment{Номер останьої пари на висоті $h$}
+
+\State{$V_{h} \gets \emptyset$}
+\State{$E_{h} \gets \emptyset$}
+\State{$\mathbf{R}_{h} \gets \emptyset$}
+\ForAll{$i$ such that $0 \leq i < N$}
+    \State{$addr_{i} \gets \Call{getPair}{i}$} \Comment{отримати адресу пари в мережі}
+    \State{$token0_{i} \gets \Call{token0}{addr_{i}}$}
+    \State{$token1_{i} \gets \Call{token1}{addr_{i}}$}
+
+    \State{$V_{h} \gets V_{h} \cup \{token0_{i}, token1_{i}\}$} \Comment{Додаємо нові вершини}
+    \State{$E_{h} \gets E_{h} \cup \{(token0_{i}, token1_{i})\}$} \Comment{Додаємо нове ребро}
+
+    \State{$(reserve0_{i}, reserve1_{i}) \gets \Call{getReserves}{addr_{i}}$} \Comment{отримати резерви пари}
+
+    \State{$\mathbf{R}_{h} \gets \mathbf{R}_{h} \cup \{(reserve0_{i}, reserve1_{i})\}$}
+\EndFor{}
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Алгоритм пошуку шляху при фіксованому об'ємі}
+
+У даному розділі розглядається алгоритми пошуку найкоротших шляхів при
+фіксованому об'ємі обміну $\Delta x \in \mathbb{R}^{+}$.
+
+\subsubsection{Задачі типу ``one-to-all''}
+
+Розглянемо задачу знаходження найкоротших шляхів однієї вершини між всіма іншими
+(тип задач ``one-to-all'' по класифікації~\cite{deo1980shortest}). Нехай стан
+біржевого графу на момент висоти блоку $h$ представлений у вигляді трійки:
+$(V_{h}, E_{h}, \mathbf{R}_{h})$ такій, що:
+
+\begin{equation}
+  \begin{aligned}
+    E_{h} &= \{(X, Y): X, Y \in V_{h}\}\\
+    \mathbf{R}_{h} &= \{ \{R_{X}, R_{Y}\}: (X \in V_{h} \land Y \in V_{h}) \land (X, Y) \in E_{h} \}
+  \end{aligned}
+\end{equation}
+
+де $V_{h}$ --- множина вершин, $R_{X}, R_{Y}$ --- резерви.
+
+За допомогою алгортму з розділу~\ref{sec:weight-non-fixed}
+
+\end{document}

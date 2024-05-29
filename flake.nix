@@ -19,12 +19,14 @@
           pkgs.writeScript "build-pdf" ''
             #!${pkgs.stdenv.shell}
 
+            set -eux
+
             mkdir -p ${name}.out
 
             export FLAGS="-output-directory=${name}.out"
 
             xelatex $FLAGS ${name}.tex
-            biber $FLAGS -aux_directory=${name}.out ${name}
+            biber $FLAGS ${name}.out/${name}.bcf
             xelatex $FLAGS ${name}.tex
           '';
 
