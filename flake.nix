@@ -36,6 +36,7 @@
             ${runBiberOptional}
           '';
 
+        # pythonWithPackages = pkgs.python311.withPackages (ps: with ps; [ ]);
       in rec {
         packages = {
           default = self.packages.index;
@@ -47,7 +48,15 @@
         };
 
         devShells.default = pkgs.mkShell {
-          buildInputs = (with pkgs; [ texliveFull ]);
+          buildInputs = (with pkgs;
+            [
+              texliveFull
+              # ffmpeg
+              # pango
+              # cairo
+              # pkg-config
+              # pythonWithPackages
+            ]);
 
           FONTCONFIG_FILE = pkgs.makeFontsConf {
             fontDirectories = [ pkgs.times-newer-roman ];

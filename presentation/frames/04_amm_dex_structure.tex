@@ -1,0 +1,28 @@
+\documentclass[beamer]{standalone}%
+
+
+\begin{document}
+\begin{frame}\frametitle{Крива резервів}
+
+  \begin{tikzpicture}[domain=0:4]
+    \begin{axis}%
+      [
+      grid=major,
+      ticks=none,
+      xlabel={$R_{X}$},
+      ylabel={$R_{Y}$},
+      axis x line=left,
+      axis y line=left,
+      no markers,
+      domain=0:10,
+      restrict y to domain=0:10000
+      ]
+      \addplot[thick,samples=400] (x,{10000/x});
+    \end{axis}
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}\frametitle{Структура біржа на АММ}
+\end{frame}
+
+\end{document}
