@@ -21,22 +21,21 @@
               xelatex $FLAGS ${name}/index.tex
             '';
             runBiber = ''
-              biber $FLAGS ${name}.out/index.bcf
+              biber $FLAGS $BUILD_DIR/index.bcf
               ${runXelatex}
             '';
             runBiberOptional = if run-biber then runBiber else "";
           in pkgs.writeShellScriptBin "build-pdf-${name}" ''
             #!${pkgs.stdenv.shell}
             set -e
-            mkdir -p ${name}.out
+            export BUILD_DIR="build/${name}.out"
+            mkdir -p $BUILD_DIR
 
-            export FLAGS="-output-directory=${name}.out"
+            export FLAGS="-output-directory=$BUILD_DIR"
 
             ${runXelatex}
             ${runBiberOptional}
           '';
-
-        # pythonWithPackages = pkgs.python311.withPackages (ps: with ps; [ ]);
       in rec {
         packages = {
           default = self.packages.index;
@@ -45,18 +44,14 @@
             name = "presentation";
             run-biber = false;
           };
+          short-prep = buildPdf {
+            name = "short-prep";
+            run-biber = false;
+          };
         };
 
         devShells.default = pkgs.mkShell {
-          buildInputs = (with pkgs;
-            [
-              texliveFull
-              # ffmpeg
-              # pango
-              # cairo
-              # pkg-config
-              # pythonWithPackages
-            ]);
+          buildInputs = (with pkgs; [ texliveFull ]);
 
           FONTCONFIG_FILE = pkgs.makeFontsConf {
             fontDirectories = [ pkgs.times-newer-roman ];
