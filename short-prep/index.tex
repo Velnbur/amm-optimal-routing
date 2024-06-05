@@ -56,33 +56,15 @@
 			\only<3>{
 				\begin{tikzpicture}
 					\node[rectangle,
-						fill = blue!5!white,
-						minimum width = 3cm,
-						minimum height = 0.25cm,
-						fill] (r) at (0,2.2) {5 \%};
-
-					\node[rectangle,
-						fill = blue!10!white,
-						minimum width = 3cm,
-						minimum height = 0.6cm,
-						fill] (r) at (0,1.65) {15 \%};
-
-					\node[rectangle,
 						fill = blue!30!white,
 						minimum width = 3cm,
-						minimum height = 1.4cm,
-						fill] (r) at (0,0.65) {30 \%};
-
-					\node[rectangle,
-						fill = blue!50!white,
-						minimum width = 3cm,
-						minimum height = 2.5cm,
-						fill] (r) at (0,-1.25) {50 \%};
-
-					\node[rectangle,
-						minimum width = 3cm,
 						minimum height = 5cm,
-						draw] (r) at (0,0) {};
+						draw] (r) at (0,0) { $R_{X}$ = 100,100 \$};
+					\node[rectangle,
+						fill = green!30!white,
+						minimum width = 3cm,
+						minimum height = 0.5cm,
+						draw] (r) at (0,2.75) { $+ \Delta x$ = 100 \$};
 				\end{tikzpicture}
 			}
 		\end{column}
@@ -101,33 +83,16 @@
 			\only<3>{
 				\begin{tikzpicture}
 					\node[rectangle,
-						fill = blue!5!white,
-						minimum width = 3cm,
-						minimum height = 0.5cm,
-						fill] (r) at (0,2.25) {10 \%};
-
-					\node[rectangle,
-						fill = blue!10!white,
-						minimum width = 3cm,
-						minimum height = 0.5cm,
-						fill] (r) at (0,1.75) {10 \%};
-
-					\node[rectangle,
 						fill = blue!30!white,
 						minimum width = 3cm,
-						minimum height = 1cm,
-						fill] (r) at (0,1) {20 \%};
-
-					\node[rectangle,
-						fill = blue!50!white,
-						minimum width = 3cm,
-						minimum height = 3cm,
-						fill] (r) at (0,-1) {60 \%};
-
-					\node[rectangle,
-						minimum width = 3cm,
 						minimum height = 5cm,
-						draw] (r) at (0,0) {};
+						draw] (r) at
+					(0,0) { $R_{Y}$ = 109,890 €};
+					\node[rectangle,
+						fill = red!30!white,
+						minimum width = 3cm,
+						minimum height = 0.5cm,
+						draw] (r) at (0,2.25) { $- \Delta y$ = 110 €};
 				\end{tikzpicture}
 			}
 		\end{column}
@@ -151,7 +116,7 @@
 	У випадку коли умова \eqref{eq:exchange} виконується, обмін стається, інакше обмін не відбувається.
 \end{frame}
 
-\begin{frame}\frametitle{Структура біржі на АММ}
+\begin{frame}\frametitle{Граф біржі}
 	\only<1>{
 		\centering
 		\begin{tikzpicture}
@@ -175,25 +140,6 @@
 		\end{tikzpicture}
 	}
 	\only<3>{
-		\centering
-		\begin{tikzpicture}
-			\node[circle,draw = black] (x) at (0, -1) {X};
-			\node[circle,draw = black] (y) at (4, 0) {Y};
-			\node[circle,draw = black] (z) at (8, 0) {Z};
-			\node[circle,draw = black] (w) at (4, -2) {W};
-			\node[circle,draw = black] (v) at (8, -2) {V};
-			\node[circle,draw = black] (u) at (0, -3) {U};
-			\node[circle,draw = black] (t) at (4, -4) {T};
-
-			\draw[-] (x) to node [above, sloped] {} (y);
-			\draw[-] (y) to node [above] {} (z);
-			\draw[-] (x) to node [below,sloped] {} (w);
-			\draw[-] (w) to node [below,sloped] {} (v);
-			\draw[-] (x) to node [below,sloped] {} (u);
-			\draw[-] (u) to node [below,sloped] {} (t);
-		\end{tikzpicture}
-	}
-	\only<4>{
 		\begin{figure}
 			\centering
 			\includegraphics[scale=0.11]{presentation/images/graphia.png}
@@ -295,7 +241,7 @@
 	}
 \end{frame}
 
-\begin{frame}\frametitle{Функція обміну}
+\begin{frame}\frametitle{Результати: Функція обміну}
 	\begin{block}{Функція обміну}
 		\begin{equation*}
 			\Delta y = f_{X/Y}(\Delta x) = R_{Y} - \frac{R_{Y} R_{X}}{R_{X} + \gamma \Delta x}
@@ -319,7 +265,7 @@
 	\end{block}
 \end{frame}
 
-\begin{frame}\frametitle{Функція обміну для $n$ переходів}
+\begin{frame}\frametitle{Результати: Функція обміну для $n$ переходів}
 	\begin{equation*}
 		f_{C/\ldots/C_{i+1}} = f_{C_{0}/C_{1}} \circ f_{C_{1}/C_{2}} \circ \ldots f_{C_{i}/C_{i+1}}
 	\end{equation*}
@@ -334,7 +280,7 @@
 	\end{block}
 \end{frame}
 
-\begin{frame}\frametitle{Порівняння шляхів}
+\begin{frame}\frametitle{Результати: Порівняння шляхів}
 	\only<1>{
 		\centering
 		\begin{tikzpicture}
@@ -377,35 +323,98 @@
 
 			% And place all other nodes around X
 			\node[circle,draw = black] (y) at (3, 0) {Y};
-			\node[circle,draw = black] (z) at (-2, 0) {Z};
-			\node[circle,draw = black] (w) at (-2, 2) {W};
-			\node[circle,draw = black] (v) at (2, 3) {V};
-			\node[circle,draw = black] (u) at (0, 2) {U};
-			\node[circle,draw = black] (t) at (0, -2) {T};
-			\node[circle,draw = black] (s) at (5, 0) {S};
-			\node[circle,draw = black] (r) at (-4, 0) {R};
-			\node[circle,draw = black] (p) at (-2, -4) {P};
-			\node[circle,draw = black] (o) at (2, -4) {O};
+			\node[circle,draw = black] (v) at (5, 1) {V};
+			\node[circle,draw = black] (s) at (5, -1) {S};
 
 			% Draw edges for node around X
-			\draw[-] (x) to node [above, sloped] {$f_{X/Y}$} (y);
-			\draw[-] (x) to node [above, sloped] {} (z);
-			\draw[-] (x) to node [above, sloped] {} (u);
-			\draw[-] (x) to node [above, sloped] {} (t);
-			% Draw edges for node around Y        $f_{X}$
-			\draw[-] (y) to node [above, sloped] {$f_{Y/V}$} (v);
-			\draw[-] (y) to node [above, sloped] {$f_{Y/S}$} (s);
-			% Draw edges for node around Z
-			\draw[-] (z) to node [above, sloped] {} (w);
-			\draw[-] (z) to node [above, sloped] {} (r);
-			% Draw edges for node around T
-			\draw[-] (t) to node [above, sloped] {} (p);
-			\draw[-] (t) to node [above, sloped] {} (o);
-			% Draw other edges                    $f_{X}$
-			\draw[-] (w) to node [above, sloped] {} (u);
-			\draw[-] (v) to node [above, sloped] {} (u);
-			\draw[-] (s) to node [above, sloped] {} (t);
-			\draw[-] (r) to node [above, sloped] {} (t);
+			\draw[->] (x) to node [above, sloped] {$f_{X/Y}$} (y);
+			\draw[->] (y) to node [above, sloped] {$f_{Y/V}$} (v);
+			\draw[->] (y) to node [above, sloped] {$f_{Y/S}$} (s);
+		\end{tikzpicture}
+	}
+	\only<3>{
+		\centering
+		\begin{tikzpicture}
+			% draw X at center
+			\node[circle,draw = red,text=red] (x) at (0, 0) {X};
+
+			% And place all other nodes around X
+			\node[circle,draw = black] (y) at (3, 0) {Y};
+			\node[circle,draw = black] (v) at (5, 1) {V};
+			\node[circle,draw = black] (s) at (5, -1) {S};
+
+			% Draw edges for node around X
+			\draw[->] (x) to node [above, sloped] {$f_{X/Y}$} (y);
+			\draw[->] (y) to node [above, sloped] {$f_{X/Y/V}$} (v);
+			\draw[->] (y) to node [above, sloped] {$f_{X/Y/S}$} (s);
+		\end{tikzpicture}
+	}
+	\only<4>{
+		\centering
+		\begin{tikzpicture}
+			% draw X at center
+			\node[circle,draw = red,text=red] (x) at (0, 0) {X};
+
+			% And place all other nodes around X
+			\node[circle,draw = black] (y) at (3, 0) {Y};
+			\node[circle,draw = black] (v) at (5, 1) {V};
+			\node[circle,draw = black] (s) at (5, -1) {S};
+
+			\node[circle,draw = blue,text = blue] (base) at (2, 2) {\$};
+
+			% Draw edges for node around X
+			\draw[->] (x) to node [above, sloped] {$f_{X/Y/\$}$} (y);
+			\draw[->] (y) to node [above, sloped] {$f_{X/Y/V/\$}$} (v);
+			\draw[->] (y) to node [above, sloped] {$f_{X/Y/S/\$}$} (s);
+
+			\draw[bend left=80, looseness=1.5, -, blue] (base) to node [above, sloped] {} (s);
+			\draw[-, blue] (base) to node [above, sloped] {} (v);
+			\draw[-, blue] (base) to node [above, sloped] {} (y);
+			\draw[-, blue] (base) to node [above, sloped] {} (x);
+		\end{tikzpicture}
+	}
+\end{frame}
+
+\begin{frame}\frametitle{Результати: Алгоритм при фіксованому обʼємі $\Delta x$}
+	\only<1>{
+		Якщо $\Delta x$ - відоме значення обміну, то при обчисленні функцій
+		отримуємо об'ємі після обмінів по шляхам графу в еквіваленті базової валюти
+		(у даному випадку $\$$).
+
+		\centering
+		\begin{tikzpicture}
+			% draw X at center
+			\node[circle,draw = red,text=red] (x) at (0, 0) {X};
+
+			% And place all other nodes around X
+			\node[circle,draw = black] (y) at (3, 0) {Y};
+			\node[circle,draw = black] (v) at (5, 1) {V};
+			\node[circle,draw = black] (s) at (5, -1) {S};
+
+			% Draw edges for node around X
+			\draw[->] (x) to node [above, sloped] {$100 \$ $} (y);
+			\draw[->] (y) to node [above, sloped] {$200 \$ $} (v);
+			\draw[->] (y) to node [above, sloped] {$180 \$ $} (s);
+		\end{tikzpicture}
+	}
+	\only<2>{
+		\begin{equation*}
+			f_{X/\$}(\Delta x) = 110 \$
+		\end{equation*}
+		\centering
+		\begin{tikzpicture}
+			% draw X at center
+			\node[circle,draw = red,text=red] (x) at (0, 0) {X};
+
+			% And place all other nodes around X
+			\node[circle,draw = black] (y) at (3, 0) {Y};
+			\node[circle,draw = black] (v) at (5, 1) {V};
+			\node[circle,draw = black] (s) at (5, -1) {S};
+
+			% Draw edges for node around X
+			\draw[->] (x) to node [above, sloped] {$-10 \$ $} (y);
+			\draw[->] (y) to node [above, sloped] {$+100 \$ $} (v);
+			\draw[->] (y) to node [above, sloped] {$+80 \$ $} (s);
 		\end{tikzpicture}
 	}
 	\only<3>{
@@ -421,166 +430,32 @@
 			\node[circle,draw = black] (v) at (2, 3) {V};
 			\node[circle,draw = black] (u) at (0, 2) {U};
 			\node[circle,draw = black] (t) at (0, -2) {T};
-			\node[circle,draw = black] (s) at (5, 0) {S};
-			\node[circle,draw = black] (r) at (-4, 0) {R};
-			\node[circle,draw = black] (p) at (-2, -4) {P};
-			\node[circle,draw = black] (o) at (2, -4) {O};
-
-			% Draw edges for node around X
-			\draw[-] (x) to node [above, sloped] {$f_{X/Y}$} (y);
-			\draw[-] (x) to node [above, sloped] {} (z);
-			\draw[-] (x) to node [above, sloped] {} (u);
-			\draw[-] (x) to node [above, sloped] {} (t);
-			% Draw edges for node around Y        $f_{X}$
-			\draw[-] (y) to node [above, sloped] {$f_{X/Y/V}$} (v);
-			\draw[-] (y) to node [above, sloped] {$f_{X/Y/S}$} (s);
-			% Draw edges for node around Z
-			\draw[-] (z) to node [above, sloped] {} (w);
-			\draw[-] (z) to node [above, sloped] {} (r);
-			% Draw edges for node around T
-			\draw[-] (t) to node [above, sloped] {} (p);
-			\draw[-] (t) to node [above, sloped] {} (o);
-			% Draw other edges                    $f_{X}$
-			\draw[-] (w) to node [above, sloped] {} (u);
-			\draw[-] (v) to node [above, sloped] {} (u);
-			\draw[-] (s) to node [above, sloped] {} (t);
-			\draw[-] (r) to node [above, sloped] {} (t);
-		\end{tikzpicture}
-	}
-	\only<4>{
-		\centering
-		\begin{tikzpicture}
-			% draw X at center
-			\node[circle,draw = red,text=red] (x) at (0, 0) {X};
-
-			% And place all other nodes around X
-			\node[circle,draw = black] (y) at (3, 0) {Y};
-			\node[circle,draw = black] (z) at (-2, 0) {Z};
-			\node[circle,draw = black] (w) at (-2, 2) {W};
-			\node[circle,draw = black] (v) at (2, 3) {V};
-			\node[circle,draw = black] (u) at (0, 2) {U};
-			\node[circle,draw = black] (t) at (0, -2) {T};
 			\node[circle,draw = black] (s) at (5.5, 0) {S};
 			\node[circle,draw = black] (r) at (-4, 0) {R};
 			\node[circle,draw = black] (p) at (-2, -4) {P};
 			\node[circle,draw = black] (o) at (2, -4) {O};
 
-			\node[circle,draw = blue,text = blue] (base) at (4, 2) {\$};
-			\draw[-, blue] (base) to node [above, sloped] {} (v);
-			\draw[-, blue] (base) to node [above, sloped] {} (s);
-			\draw[-, blue] (base) to node [above, sloped] {} (y);
-			\draw[-, blue] (base) to node [above, sloped] {} (x);
-
-			% Draw edges for node around X
-			\draw[-] (x) to node [above, sloped] {$f_{X/Y/\$}$} (y);
-			\draw[-] (x) to node [above, sloped] {} (z);
-			\draw[-] (x) to node [above, sloped] {} (u);
-			\draw[-] (x) to node [above, sloped] {} (t);
-			% Draw edges for node around Y        $f_{X}$
-			\draw[-] (y) to node [above, sloped] {$f_{X/Y/V/\$}$} (v);
-			\draw[-] (y) to node [above, sloped] {$f_{X/Y/S/\$}$} (s);
-			% Draw edges for node around Z
-			\draw[-] (z) to node [above, sloped] {} (w);
-			\draw[-] (z) to node [above, sloped] {} (r);
-			% Draw edges for node around T
-			\draw[-] (t) to node [above, sloped] {} (p);
-			\draw[-] (t) to node [above, sloped] {} (o);
-			% Draw other edges                    $f_{X}$
-			\draw[-] (w) to node [above, sloped] {} (u);
-			\draw[-] (v) to node [above, sloped] {} (u);
-			\draw[-] (s) to node [above, sloped] {} (t);
-			\draw[-] (r) to node [above, sloped] {} (t);
+			\draw[->] (x) to node [above, sloped] {$-10 \$$} (y);p
+			\draw[->] (x) to node [above, sloped] {$+10 \$$} (z);
+			\draw[->] (x) to node [above, sloped] {$+12 \$$} (u);
+			\draw[->] (x) to node [above, sloped] {$-13 \$$} (t);
+			\draw[->] (y) to node [above, sloped] {$+100 \$$} (v);
+			\draw[->] (y) to node [above, sloped] {$+80 \$$} (s);
+			\draw[->] (z) to node [above, sloped] {$+40 \$$} (w);
+			\draw[->] (z) to node [above, sloped] {$-30 \$$} (r);
+			\draw[->] (t) to node [above, sloped] {$+20 \$$} (p);
+			\draw[->] (t) to node [above, sloped] {$-10 \$$} (o);
+			\draw[->] (w) to node [above, sloped] {$+10 \$$} (u);
+			\draw[->] (v) to node [above, sloped] {$+10 \$$} (u);
+			\draw[->] (s) to node [above, sloped] {$+10 \$$} (t);
+			\draw[->] (r) to node [above, sloped] {$+10 \$$} (t);
 
 		\end{tikzpicture}
 	}
 \end{frame}
 
-\begin{frame}\frametitle{При фіксованому обʼємі $\Delta x$}
-	\only<1>{
-		\centering
-		\begin{tikzpicture}
-			% draw X at center
-			\node[circle,draw = red,text=red] (x) at (0, 0) {X};
-
-			% And place all other nodes around X
-			\node[circle,draw = black] (y) at (3, 0) {Y};
-			\node[circle,draw = black] (z) at (-2, 0) {Z};
-			\node[circle,draw = black] (w) at (-2, 2) {W};
-			\node[circle,draw = black] (v) at (2, 3) {V};
-			\node[circle,draw = black] (u) at (0, 2) {U};
-			\node[circle,draw = black] (t) at (0, -2) {T};
-			\node[circle,draw = black] (s) at (5.5, 0) {S};
-			\node[circle,draw = black] (r) at (-4, 0) {R};
-			\node[circle,draw = black] (p) at (-2, -4) {P};
-			\node[circle,draw = black] (o) at (2, -4) {O};
-
-			% Draw edges for node around X
-			\draw[-] (x) to node [above, sloped] {$100 \$$} (y);
-			\draw[-] (x) to node [above, sloped] {} (z);
-			\draw[-] (x) to node [above, sloped] {} (u);
-			\draw[-] (x) to node [above, sloped] {} (t);
-			% Draw edges for node around Y        $f_{X}$
-			\draw[-] (y) to node [above, sloped] {$200 \$$} (v);
-			\draw[-] (y) to node [above, sloped] {$180 \$$} (s);
-			% Draw edges for node around Z
-			\draw[-] (z) to node [above, sloped] {} (w);
-			\draw[-] (z) to node [above, sloped] {} (r);
-			% Draw edges for node around T
-			\draw[-] (t) to node [above, sloped] {} (p);
-			\draw[-] (t) to node [above, sloped] {} (o);
-			% Draw other edges                    $f_{X}$
-			\draw[-] (w) to node [above, sloped] {} (u);
-			\draw[-] (v) to node [above, sloped] {} (u);
-			\draw[-] (s) to node [above, sloped] {} (t);
-			\draw[-] (r) to node [above, sloped] {} (t);
-
-		\end{tikzpicture}
-	}
-	\only<2>{
-		\centering
-		\begin{tikzpicture}
-			% draw X at center
-			\node[circle,draw = red,text=red] (x) at (0, 0) {X};
-
-			% And place all other nodes around X
-			\node[circle,draw = black] (y) at (3, 0) {Y};
-			\node[circle,draw = black] (z) at (-2, 0) {Z};
-			\node[circle,draw = black] (w) at (-2, 2) {W};
-			\node[circle,draw = black] (v) at (2, 3) {V};
-			\node[circle,draw = black] (u) at (0, 2) {U};
-			\node[circle,draw = black] (t) at (0, -2) {T};
-			\node[circle,draw = black] (s) at (5.5, 0) {S};
-			\node[circle,draw = black] (r) at (-4, 0) {R};
-			\node[circle,draw = black] (p) at (-2, -4) {P};
-			\node[circle,draw = black] (o) at (2, -4) {O};
-
-			% Draw edges for node around X
-			\draw[-] (x) to node [above, sloped] {$-10 \$$} (y);p
-			\draw[-] (x) to node [above, sloped] {} (z);
-			\draw[-] (x) to node [above, sloped] {} (u);
-			\draw[-] (x) to node [above, sloped] {} (t);
-			% Draw edges for node around Y        $f_{X}$
-			\draw[-] (y) to node [above, sloped] {$+100 \$$} (v);
-			\draw[-] (y) to node [above, sloped] {$+80 \$$} (s);
-			% Draw edges for node around Z
-			\draw[-] (z) to node [above, sloped] {} (w);
-			\draw[-] (z) to node [above, sloped] {} (r);
-			% Draw edges for node around T
-			\draw[-] (t) to node [above, sloped] {} (p);
-			\draw[-] (t) to node [above, sloped] {} (o);
-			% Draw other edges                    $f_{X}$
-			\draw[-] (w) to node [above, sloped] {} (u);
-			\draw[-] (v) to node [above, sloped] {} (u);
-			\draw[-] (s) to node [above, sloped] {} (t);
-			\draw[-] (r) to node [above, sloped] {} (t);
-
-		\end{tikzpicture}
-	}
-\end{frame}
-
-\begin{frame}\frametitle{При нефіксованому $\Delta x$}
-	Зазначен метод cпрощення графа через знаходженням пар (ребер) через котрі не
-	можливо провести обміни при деяких $\Delta x$.
+\begin{frame}
+  \centering\Huge Дякую за увагу!
 \end{frame}
 
 

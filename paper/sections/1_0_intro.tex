@@ -63,9 +63,9 @@ $f(R - \Delta) = f(R)$. (Звідси і назва ``маркет-мейкер 
   Maker''}), де відношення вкладів до і після має бути константним. Тобто при
 продажі $\Delta x$ валюти отримуємо $\Delta y$:
 
-\begin{equation*}
+\begin{equation}\label{eq:amm-swap-constraint}
 	R_{X} \cdot R_{Y} = (R_{X} + \Delta x) \cdot (R_{Y} - \Delta y)
-\end{equation*}
+\end{equation}
 
 \begin{figure}[h!]
 	\centering
@@ -88,6 +88,15 @@ $f(R - \Delta) = f(R)$. (Звідси і назва ``маркет-мейкер 
 	\caption{Зображення графіку залежностей вкладів у пару}\label{fig:isoquant}
 \end{figure}
 
+У випадках коли маркет мейкер має систему комісій, то відсоток, що забирає
+комісія позначається через $q$. Звідси з формули~\eqref{eq:amm-swap-constraint}:
+
+\begin{equation*}
+	R_{X} \cdot R_{Y} = (R_{X} + \gamma \cdot \Delta x) \cdot (R_{Y} - \Delta y)
+\end{equation*}
+
+де $\gamma = 1 - q$.
+
 \subsection{Біржевий граф}
 
 Нехай \(G_{t} = (V_{t}, E_{t})\) --- неорієнтований динамічний граф, де \(V_{t}\) ---
@@ -108,4 +117,18 @@ $f(R - \Delta) = f(R)$. (Звідси і назва ``маркет-мейкер 
   \item Створення нової пари (змінює ребра та вершини).
   \item Обмін однієї пари або послідовності валют на біржі (змінює ваги ребер).
 \end{enumerate}
+
+Стандартною задачою будемо вважати таку задачу пошуку найкоротшого шляху, що
+трійки:
+
+\begin{equation*}
+  \begin{aligned}
+	&(E_{h}, V_{h}, w) \\
+	& w : E_{h} \mapsto \mathbb{R}
+  \end{aligned}
+\end{equation*}
+
+де $w$ --- відображення ребра в число з $\mathbb{R}$, що визначає його вагу, котру
+можна порівнювати, сумувати та що будуть мати одну й ту саму одиницю
+вимірювання.
 \end{document}
