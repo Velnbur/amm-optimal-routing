@@ -46,12 +46,14 @@
 \usepackage[ukrainian]{babel}
 
 \usepackage{polyglossia}
-\setdefaultlanguage{ukrainian}
+\setmainlanguage[numerals=arabic]{ukrainian}
 \setotherlanguages{english}
 \setmonofont{Fira Code}[
   Scale=0.85
 ]
 % \newfontfamily{\cyrillicfonttt}{FiraCode Nerd Font}
+
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{}{1em}{}
 
 \usepackage[format=plain,
 	labelfont={bf},
@@ -142,6 +144,7 @@
 \end{titlepage}
 \newpage
 
+\setcounter{page}{2}
 
 \section*{РЕФЕРАТ}\label{sec:abstract}
 
@@ -205,27 +208,34 @@ Uniswap. Інструменти розроблення: програмне за�
 
 \newpage
 
-\section{ВСТУП}\label{sec:intro}
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{}{1em}{}
+\section*{ВСТУП}\label{sec:intro}
+\addcontentsline{toc}{section}{ВСТУП~\label{sec:intro}}
+
 \subfile{./paper/sections/1_0_intro}
 
 \newpage
 
-\section{Функція обміну}\label{sec:swap-function}
+\setcounter{section}{0}
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{}{1em}{}
+
+\section{РОЗДІЛ 1. ФУНКЦІЯ ОБМІНУ}\label{sec:swap-function}
 \subfile{./paper/sections/2_0_swap_function}
 
 \newpage
 
-\section{Формалізація графа}\label{sec:graph}
+\section{РОЗДІЛ 2. ФОРМАЛІЗАЦІЯ ГРАФА}\label{sec:graph}
 \subfile{./paper/sections/3_0_graph}
 
 \newpage
 
-\section{Імплементація алгоритму}\label{sec:algorithm-impl}
+\section{РОЗДІЛ 3. ІМПЛЕМЕНТАЦІЯ АЛГОРИТМУ}\label{sec:algorithm-impl}
 \subfile{./paper/sections/4_0_algorithm_impl}
 
 \newpage
 
-\section{ВИСНОВКИ}
+\section*{ВИСНОВКИ}\label{sec:conclusions}
+\addcontentsline{toc}{section}{ВИСНОВКИ~\label{sec:conclusions}}
 
 Запропонований алгоритм може бути впроваджений в будь-якій біржі, що
 використовує АММ з функціями обміну константного добутку. Це включає як
@@ -260,10 +270,13 @@ Pancakeswap та інші подібні сервіси. Алгоритм доз
 
 \newpage
 
-\printbibliography{}
+\printbibliography[title = ПЕРЕЛІК ДЖЕРЕЛ ПОСИЛАННЯ]{}
 \newpage
 
-\section{ДОДАТОК А}\label{sec:addition-a}
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{ДОДАТОК A:\thesection}{1em}{}
+
+\section*{СТРУКТУРА БД}\label{appendix:db}
+\addcontentsline{toc}{section}{ДОДАТОК A~\label{appendix:db}: СТРУКТУРА БД}
 
 У цьому додатку наведений приклад SQL коду для оформлення бази даних у
 імплементації даного алгоритму.
