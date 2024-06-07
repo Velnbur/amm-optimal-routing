@@ -14,7 +14,6 @@
 \usepackage{subfiles}
 
 \usepackage{csquotes}
-% \usepackage{capt-of}
 \usepackage[normalem]{ulem}
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -221,19 +220,27 @@ Uniswap. Інструменти розроблення: програмне за�
 \setcounter{section}{0}
 \titleformat{\section}[block]{\Large\bfseries\filcenter}{}{1em}{}
 
-\section{РОЗДІЛ 1. МЕХАНІЗМ РОБОТИ БІРЖІ}\label{sec:order-book-cmp}
+\section*{РОЗДІЛ 1. МЕХАНІЗМ РОБОТИ БІРЖІ}\label{sec:order-book-cmp}
+\addcontentsline{toc}{section}{РОЗДІЛ 1~\label{sec:order-book-cmp}: МЕХАНІЗМ РОБОТИ БІРЖІ}
+\setcounter{section}{1}
 \subfile{./paper/sections/1_0_order_book_cmp}
 \newpage
 
-\section{РОЗДІЛ 2. ФУНКЦІЯ ОБМІНУ}\label{sec:swap-function}
+\section*{РОЗДІЛ 2. ФУНКЦІЯ ОБМІНУ}\label{sec:swap-function}
+\addcontentsline{toc}{section}{РОЗДІЛ 2~\label{sec:swap-function}: ФУНКЦІЯ ОБМІНУ}
+\setcounter{section}{2}
 \subfile{./paper/sections/2_0_swap_function}
 \newpage
 
-\section{РОЗДІЛ 3. ФОРМАЛІЗАЦІЯ ГРАФА}\label{sec:graph}
+\section*{РОЗДІЛ 3. ФОРМАЛІЗАЦІЯ ГРАФА}\label{sec:graph}
+\addcontentsline{toc}{section}{РОЗДІЛ 3~\label{sec:graph}: ФОРМАЛІЗАЦІЯ ГРАФА}
+\setcounter{section}{3}
 \subfile{./paper/sections/3_0_graph}
 \newpage
 
-\section{РОЗДІЛ 4. ІМПЛЕМЕНТАЦІЯ АЛГОРИТМУ}\label{sec:algorithm-impl}
+\section*{РОЗДІЛ 4. ІМПЛЕМЕНТАЦІЯ АЛГОРИТМУ}\label{sec:algorithm-impl}
+\addcontentsline{toc}{section}{РОЗДІЛ 4~\label{sec:algorithm-impl}: ІМПЛЕМЕНТАЦІЯ АЛГОРИТМУ}
+\setcounter{section}{4}
 \subfile{./paper/sections/4_0_algorithm_impl}
 \newpage
 
