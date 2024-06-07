@@ -171,9 +171,9 @@ $W_{i} => 0$, чи збитки при $W_{i} < 0$, а $W_{0}$ --- початк�
 		\node (y) at (10, -1) {Y};
 		\node (w) at (4, -2) {W};
 
-		\draw[->] (x) to node [above,sloped] {\(S_{X/Z/base} - 0\)} (z);
+		\draw[->] (x) to node [above,sloped] {\(S_{X/Z/base} - S_{0}\)} (z);
 		\draw[->] (z) to node [above,sloped] {\(S_{Z/Y/base} - S_{X/Z/base}\)} (y);
-		\draw[->] (x) to node [below,sloped] {\(S_{Z/W/base} - 0\)} (w);
+		\draw[->] (x) to node [below,sloped] {\(S_{Z/W/base} - S_{0}\)} (w);
 		\draw[->] (w) to node [below,sloped] {\(S_{W/Y/base} - S_{Z/W/base}\)} (y);
 
 	\end{tikzpicture}

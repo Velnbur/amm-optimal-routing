@@ -31,6 +31,8 @@
 \usepackage{pgfplots}
 \usetikzlibrary{graphs,quotes}
 
+\usepackage[table]{xcolor}
+\usepackage{float}
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -78,6 +80,7 @@
 
 \newtheorem{theorem}{Теорема}
 \newtheorem{lemma}{Лема}
+\newtheorem{definition}{Визначення}
 \renewcommand\qedsymbol{$\blacksquare$}
 
 \begin{document}
@@ -148,8 +151,8 @@
 
 \section*{РЕФЕРАТ}\label{sec:abstract}
 
-Обсяг роботи~\ztotpages{} сторінки, 8 ілюстрацій, \total{citenum} використаних
-джерел та 1 додаток.
+Обсяг роботи~\ztotpages{} сторінок, 9 ілюстрацій, 1 таблиця, \total{citenum}
+використаних джерел та 1 додаток.
 
 БІРЖІ, МАРКЕТ МЕЙКЕРИ, АММ, КОНСТАНТНІ ФУНКЦІЇ ОБМІНУ, ДИНАМІЧНІ ГРАФИ,
 ОПТИМІЗАЦІЯ, АЛГОРИТМИ, КОНСТАНТНІ ФУНКЦІЇ ДОБУТКУ, БЛОКЧЕЙН, КРИПТОВАЛЮТИ,
@@ -212,26 +215,26 @@ Uniswap. Інструменти розроблення: програмне за�
 \section*{ВСТУП}\label{sec:intro}
 \addcontentsline{toc}{section}{ВСТУП~\label{sec:intro}}
 
-\subfile{./paper/sections/1_0_intro}
-
+\subfile{./paper/sections/0_0_introduction}
 \newpage
 
 \setcounter{section}{0}
 \titleformat{\section}[block]{\Large\bfseries\filcenter}{}{1em}{}
 
-\section{РОЗДІЛ 1. ФУНКЦІЯ ОБМІНУ}\label{sec:swap-function}
+\section{РОЗДІЛ 1. МЕХАНІЗМ РОБОТИ БІРЖІ}\label{sec:order-book-cmp}
+\subfile{./paper/sections/1_0_order_book_cmp}
+\newpage
+
+\section{РОЗДІЛ 2. ФУНКЦІЯ ОБМІНУ}\label{sec:swap-function}
 \subfile{./paper/sections/2_0_swap_function}
-
 \newpage
 
-\section{РОЗДІЛ 2. ФОРМАЛІЗАЦІЯ ГРАФА}\label{sec:graph}
+\section{РОЗДІЛ 3. ФОРМАЛІЗАЦІЯ ГРАФА}\label{sec:graph}
 \subfile{./paper/sections/3_0_graph}
-
 \newpage
 
-\section{РОЗДІЛ 3. ІМПЛЕМЕНТАЦІЯ АЛГОРИТМУ}\label{sec:algorithm-impl}
+\section{РОЗДІЛ 4. ІМПЛЕМЕНТАЦІЯ АЛГОРИТМУ}\label{sec:algorithm-impl}
 \subfile{./paper/sections/4_0_algorithm_impl}
-
 \newpage
 
 \section*{ВИСНОВКИ}\label{sec:conclusions}
